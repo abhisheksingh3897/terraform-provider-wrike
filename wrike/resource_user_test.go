@@ -17,7 +17,7 @@ func TestAccItem_Basic(t *testing.T) {
 			{
 				Config: testAccCheckItemBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("wrike_user.user1", "email", "abhishek.singh3897@gmail.com"),
+					resource.TestCheckResourceAttr("wrike_user.user1", "email", "abhisheksingh17@ece.iiitp.ac.in"),
 				),
 			},
 		},
@@ -27,7 +27,7 @@ func TestAccItem_Basic(t *testing.T) {
 func testAccCheckItemBasic() string {
 	return fmt.Sprintf(`
 resource "wrike_user" "user1" {    
-    email= "abhishek.singh3897@gmail.com"
+    email= "abhisheksingh17@ece.iiitp.ac.in"
 }
 `)
 }

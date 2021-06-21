@@ -105,6 +105,15 @@ func (c *Client) HttpRequest(path, method string, body *strings.Reader) ([]byte,
 	return respbody, nil
 }
 
+func (c *Client) IsRetry(err error) bool {
+	if err != nil {
+		if strings.Contains(err.Error(), "429") == true {
+			return true
+		}
+	}
+	return false
+}
+
 func (c *Client) requestPath(path string) string {
 	return fmt.Sprintf("https://www.wrike.com/api/v4/%v", path)
 }

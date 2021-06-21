@@ -17,9 +17,9 @@ func TestAccUser_Basic(t *testing.T) {
 			{
 				Config: testAccCheckUserBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.wrike_user.user1", "email", "codermafia11@gmail.com"),
-					resource.TestCheckResourceAttr("data.wrike_user.user1", "firstname", "ashu"),
-					resource.TestCheckResourceAttr("data.wrike_user.user1", "lastname", "loader"),
+					resource.TestCheckResourceAttr("data.wrike_user.user", "email", "abhishek.s@clevertap.com"),
+					resource.TestCheckResourceAttr("data.wrike_user.user1", "firstname", "Abhishek"),
+					resource.TestCheckResourceAttr("data.wrike_user.user1", "lastname", "singh"),
 				),
 			},
 		},
@@ -28,8 +28,8 @@ func TestAccUser_Basic(t *testing.T) {
 
 func testAccCheckUserBasic() string {
 	return fmt.Sprintf(`
-		data "wrike_user" "user1" {    
-    		email= "codermafia11@gmail.com"
+		data "wrike_user" "user" {    
+    		email= "abhishek.s@clevertap.com"
 		}
 	`)
 }

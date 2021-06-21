@@ -1,8 +1,12 @@
 package wrike
 
 import (
+	"fmt"
+	"strings"
 	"terraform-provider-wrike/client"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -28,7 +32,7 @@ func resourceUser() *schema.Resource {
 			},
 			"email": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 		},
 		Create: resourceCreateUser,
@@ -36,14 +40,27 @@ func resourceUser() *schema.Resource {
 		Update: resourceUpdateUser,
 		Delete: resourceDeleteUser,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceUserImporter,
 		},
 	}
 }
 
 func resourceCreateUser(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
-	err := apiClient.NewUser(d.Get("email").(string))
+	var err error
+	retryErr := resource.Retry(2*time.Minute, func() *resource.RetryError {
+		if err = apiClient.NewUser(d.Get("email").(string)); err != nil {
+			if apiClient.IsRetry(err) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	if retryErr != nil {
+		time.Sleep(2 * time.Second)
+		return retryErr
+	}
 	if err != nil {
 		return err
 	}
@@ -52,26 +69,57 @@ func resourceCreateUser(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceReadUser(d *schema.ResourceData, m interface{}) error {
-	time.Sleep(60 * time.Second)
 	apiClient := m.(*client.Client)
 	UserId := d.Id()
-	user, err := apiClient.GetUser(UserId)
-	if err != nil {
-		return err
+
+	retryErr := resource.Retry(2*time.Minute, func() *resource.RetryError {
+		user, err := apiClient.GetUser(UserId)
+		if err != nil {
+			if apiClient.IsRetry(err) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		d.Set("userid", user.ID)
+		d.Set("firstname", user.FirstName)
+		d.Set("lastname", user.LastName)
+		d.Set("email", user.Profile[0].Email)
+		d.Set("accountid", user.Profile[0].AccountID)
+		return nil
+	})
+	if retryErr != nil {
+		if strings.Contains(retryErr.Error(), "user not found") == true {
+			d.SetId("")
+			return nil
+		}
+		return retryErr
 	}
-	d.Set("userid", user.ID)
-	d.Set("firstname", user.FirstName)
-	d.Set("lastname", user.LastName)
-	d.Set("email", user.Profile[0].Email)
-	d.Set("accountid", user.Profile[0].AccountID)
 	return nil
 }
 
 func resourceUpdateUser(d *schema.ResourceData, m interface{}) error {
+	if d.HasChange("employee_email") {
+		return fmt.Errorf("Employee not allowed to change employee_email")
+	}
 	return nil
 }
 
 func resourceDeleteUser(d *schema.ResourceData, m interface{}) error {
 	d.SetId("")
 	return nil
+}
+
+func resourceUserImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	apiClient := m.(*client.Client)
+	UserId := d.Id()
+	user, err := apiClient.GetUser(UserId)
+	if err != nil {
+		return nil, err
+	}
+	d.Set("userid", user.ID)
+	d.Set("firstname", user.FirstName)
+	d.Set("lastname", user.LastName)
+	d.Set("email", user.Profile[0].Email)
+	d.Set("accountid", user.Profile[0].AccountID)
+	return []*schema.ResourceData{d}, nil
 }

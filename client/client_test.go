@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	os.Setenv("WRIKE_KEY", "bearer eyJ0dCI6InAiLCJhbGciOiJIUzI1NiIsInR2IjoiMSJ9.eyJkIjoie1wiYVwiOjQ2NTAxODYsXCJpXCI6Nzc0MzU1NyxcImNcIjo0NjI2MjkwLFwidVwiOjEwNjI2NjMwLFwiclwiOlwiVVNcIixcInNcIjpbXCJXXCIsXCJGXCIsXCJJXCIsXCJVXCIsXCJLXCIsXCJDXCIsXCJEXCIsXCJNXCIsXCJBXCIsXCJMXCIsXCJQXCJdLFwielwiOltdLFwidFwiOjB9IiwiaWF0IjoxNjIxMTc5NTkyfQ.56vbcUlIBctouj49OcOQoID0ehSmq4DveZHjKX3J2jY")
+	os.Setenv("WRIKE_TOKEN", "bearer eyJ0dCI6InAiLCJhbGciOiJIUzI1NiIsInR2IjoiMSJ9.eyJkIjoie1wiYVwiOjQ2NTAxODYsXCJpXCI6Nzc0MzU1NyxcImNcIjo0NjI2MjkwLFwidVwiOjEwNjI2NjMwLFwiclwiOlwiVVNcIixcInNcIjpbXCJXXCIsXCJGXCIsXCJJXCIsXCJVXCIsXCJLXCIsXCJDXCIsXCJEXCIsXCJNXCIsXCJBXCIsXCJMXCIsXCJQXCJdLFwielwiOltdLFwidFwiOjB9IiwiaWF0IjoxNjIxMTc5NTkyfQ.56vbcUlIBctouj49OcOQoID0ehSmq4DveZHjKX3J2jY")
 }
 
 func TestClient_GetItem(t *testing.T) {
@@ -43,7 +43,7 @@ func TestClient_GetItem(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.testName, func(t *testing.T) {
-			client := NewClient(os.Getenv("WRIKE_KEY"))
+			client := NewClient(os.Getenv("WRIKE_TOKEN"))
 			item, err := client.GetUser(tc.itemName)
 			if tc.expectErr {
 				assert.Error(t, err)
@@ -74,7 +74,7 @@ func TestClient_NewUser(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.testName, func(t *testing.T) {
-			client := NewClient(os.Getenv("WRIKE_KEY"))
+			client := NewClient(os.Getenv("WRIKE_TOKEN"))
 			err := client.NewUser(tc.newItem)
 			if tc.expectErr {
 				assert.Error(t, err)
