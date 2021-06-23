@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	os.Setenv("WRIKE_KEY", "bearer eyJ0dCI6InAiLCJhbGciOiJIUzI1NiIsInR2IjoiMSJ9.eyJkIjoie1wiYVwiOjQ2NTAxODYsXCJpXCI6Nzc0MzU1NyxcImNcIjo0NjI2MjkwLFwidVwiOjEwNjI2NjMwLFwiclwiOlwiVVNcIixcInNcIjpbXCJXXCIsXCJGXCIsXCJJXCIsXCJVXCIsXCJLXCIsXCJDXCIsXCJEXCIsXCJNXCIsXCJBXCIsXCJMXCIsXCJQXCJdLFwielwiOltdLFwidFwiOjB9IiwiaWF0IjoxNjIxMTc5NTkyfQ.56vbcUlIBctouj49OcOQoID0ehSmq4DveZHjKX3J2jY")
+	os.Setenv("WRIKE_TOKEN", "bearer eyJ0dCI6InAiLCJhbGciOiJIUzI1NiIsInR2IjoiMSJ9.eyJkIjoie1wiYVwiOjQ2NTAxODYsXCJpXCI6Nzc0MzU1NyxcImNcIjo0NjI2MjkwLFwidVwiOjEwNjI2NjMwLFwiclwiOlwiVVNcIixcInNcIjpbXCJXXCIsXCJGXCIsXCJJXCIsXCJVXCIsXCJLXCIsXCJDXCIsXCJEXCIsXCJNXCIsXCJBXCIsXCJMXCIsXCJQXCJdLFwielwiOltdLFwidFwiOjB9IiwiaWF0IjoxNjIxMTc5NTkyfQ.56vbcUlIBctouj49OcOQoID0ehSmq4DveZHjKX3J2jY")
 }
 
 func TestClient_GetItem(t *testing.T) {
@@ -30,20 +30,22 @@ func TestClient_GetItem(t *testing.T) {
 					{
 						Email:     "abhishek.singh3897@gmail.com",
 						AccountID: "IEAEN5GK",
+						Role:      "User",
+						External:  false,
 					},
 				},
 			},
 		},
 		{
 			testName:     "user does not exist",
-			itemName:     "shubham@clevertap.com",
+			itemName:     "ashutosh.verma@clevertap.com",
 			expectErr:    true,
 			expectedResp: nil,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.testName, func(t *testing.T) {
-			client := NewClient(os.Getenv("WRIKE_KEY"))
+			client := NewClient(os.Getenv("WRIKE_TOKEN"))
 			item, err := client.GetUser(tc.itemName)
 			if tc.expectErr {
 				assert.Error(t, err)
@@ -63,7 +65,7 @@ func TestClient_NewUser(t *testing.T) {
 	}{
 		{
 			testName:  "success",
-			newItem:   "shubham@clevertap.com",
+			newItem:   "ashutosh.verma@clevertap.com",
 			expectErr: false,
 		},
 		{
@@ -74,8 +76,53 @@ func TestClient_NewUser(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.testName, func(t *testing.T) {
-			client := NewClient(os.Getenv("WRIKE_KEY"))
+			client := NewClient(os.Getenv("WRIKE_TOKEN"))
 			err := client.NewUser(tc.newItem)
+			if tc.expectErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestClient_UpdateItem(t *testing.T) {
+	testCases := []struct {
+		testName     string
+		itemName     string
+		accountId    string
+		role         string
+		external     bool
+		expectErr    bool
+		expectedResp *User
+	}{
+		{
+			testName:  "user exists",
+			itemName:  "abhisheksingh17@ece.iiitp.ac.in",
+			accountId: "IEAEN5GK",
+			role:      "Collaborator",
+			external:  true,
+			expectErr: false,
+			expectedResp: &User{
+				ID:        "KUAKMCN5",
+				FirstName: "abhi",
+				LastName:  "s",
+				Profile: []UserProfile{
+					{
+						Email:     "abhisheksingh17@ece.iiitp.ac.in",
+						AccountID: "IEAEN5GK",
+						Role:      "Collaborator",
+						External:  true,
+					},
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.testName, func(t *testing.T) {
+			client := NewClient(os.Getenv("WRIKE_TOKEN"))
+			err := client.UpdateUser(tc.itemName, tc.accountId, tc.role, tc.external)
 			if tc.expectErr {
 				assert.Error(t, err)
 				return

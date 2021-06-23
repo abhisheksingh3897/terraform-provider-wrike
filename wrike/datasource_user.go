@@ -29,6 +29,14 @@ func datasourceUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"role": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"external": &schema.Schema{
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 		Read: datasourceReadUser,
 	}
@@ -46,6 +54,8 @@ func datasourceReadUser(d *schema.ResourceData, m interface{}) error {
 	d.Set("lastname", user.LastName)
 	d.Set("email", user.Profile[0].Email)
 	d.Set("accountid", user.Profile[0].AccountID)
+	d.Set("role", user.Profile[0].Role)
+	d.Set("external", user.Profile[0].External)
 	d.SetId(UserId)
 	return nil
 }

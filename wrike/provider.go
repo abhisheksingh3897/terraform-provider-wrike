@@ -12,7 +12,7 @@ func Provider() *schema.Provider {
 			"token": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("WRIKE_KEY", ""),
+				DefaultFunc: schema.EnvDefaultFunc("WRIKE_TOKEN", ""),
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
