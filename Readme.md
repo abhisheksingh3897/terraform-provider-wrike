@@ -4,7 +4,7 @@ This Terraform provider enables create, read, update and import operations for w
 
 * [Go](https://golang.org/doc/install) >= 1.16 (To build the provider plugin)<br>
 * [Terraform](https://www.terraform.io/downloads.html) >= 0.13.x <br/>
-* Application: [Wrike](https://www.wrike.com/) (API support some operation only i.e. read, create and update).
+* Application: [Wrike](https://www.wrike.com/)
 * [Wrike API Documentation](https://developers.wrike.com/api/v4/users/)
 
 
@@ -12,8 +12,6 @@ This Terraform provider enables create, read, update and import operations for w
 
 ### Setup<a id="setup"></a>
 1. Create an wrike account at https://www.wrike.com/<br>
-2. Sign in to the wrike account and start a free trial.<br>
-3. After creating an account, go to account management and can manage the users from console manually.<br>
 
 ### API Authentication
 1. To authenticate API we need a pair of credentials: Client ID and Client secret.<br>
@@ -62,7 +60,7 @@ mkdir -p %APPDATA%/terraform.d/plugins/wrike.com\user\wrike\4.0.0\windows_amd64
 3. `terraform apply` - To execute the actions proposed in a Terraform plan. Apply the chages.
 
 #### Create User
-1. Add the user `email` in the respective field in `main.tf`. We can invite the user through email only.
+1. Add the user `email` in the respective field as shown in the [example usage](#example-usage)
 2. Run the basic terraform commands.<br>
 3. On successful execution, sends an account setup mail to user.<br>
 
@@ -71,8 +69,8 @@ Add `data` and `output` blocks as shown in the [example usage](#example-usage) a
 
 ### Update the user
 1. Update the data of the user in the `resource` block as show in [example usage](#example-usage) and run the basic terraform commands to update user. 
-2. We can only update the role of user i.e. `Regular, External or Collaborator`.
-3. To make user as a Collaborator then put external also as true.
+2. We can only update the role of user i.e. `Regular user, External user and Collaborator`.
+3. To make user as a Collaborator, external should be true.
 
 #### Import a User Data
 1. Write manually a `resource` configuration block for the user as shown in [example usage](#example-usage). Imported user will be mapped to this block.
@@ -92,11 +90,13 @@ terraform {
 }
   
   provider "wrike"{
-	  token =  "bearer eyJ0dCI6InAiLCJhbGciOiJIUzI1NiIsInR2IjoiMSJ9.eyJkIjoie1wiYVwiOjQ2NTAxODYsXCJpXCI6Nzc0MzU1NyxcImNcIjo0NjI2MjkwLFwidVwiOjEwNjI2NjMwLFwiclwiOlwiVVNcIixcInNcIjpbXCJXXCIsXCJGXCIsXCJJXCIsXCJVXCIsXCJLXCIsXCJDXCIsXCJEXCIsXCJNXCIsXCJBXCIsXCJMXCIsXCJQXCJdLFwielwiOltdLFwidFwiOjB9IiwiaWF0IjoxNjIxMTc5NTkyfQ.56vbcUlIBctouj49OcOQoID0ehSmq4DveZHjKX3J2jY"
+	  token =  "bearer ACCESS_TOKEN"
   }
 
 resource "wrike_user" "user"{
-    email= "xyz@gmail.com"
+    email = "xyz@gmail.com"
+    role = "Collaborator"
+    external = true
 }
 
 output "resourse_user"{
@@ -117,14 +117,12 @@ output "datasouce_user"{
 * `email` (string) - The email id associated with the user account.
 * `firstname` (string) - First name of the User.
 * `lastname` (string) - Last Name / Family Name / Surname of the User.
-* `userid` (string) - unique id of a user, where you can read the user detail.
+* `userid` (string) - unique id of a user.
 * `accountid` (string) - account id of owner/admin account.
-* `role` (string) - role of a user
-* `external` (bool) - true for external user and vice-versa.
+* `role` (string) - role of a user. Allowed values - User, Collaborator. 
+* `external` (bool) - true for external user and Collaborator, false for Regular user.
 
 
 ## Exceptions
 
-* Update API should not update anything of the user. Wrike update their user details through console.
-* Also no API for deleting the user and activating/deactivating a user.
-* To read the user data, we need user USER_ID for fetch the user detail. You can get the USER_ID from the contact API. `https://www.wrike.com/api/v4/contacts`.
+* No API for deleting the user and activating/deactivating the user.
