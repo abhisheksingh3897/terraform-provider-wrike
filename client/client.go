@@ -24,6 +24,8 @@ type User struct {
 type UserProfile struct {
 	AccountID string `json:"accountId"`
 	Email     string `json:"email"`
+	Role      string `json:"role"`
+	External  bool   `json:"external"`
 }
 
 type UserGet struct {
@@ -87,6 +89,22 @@ func (c *Client) NewUser(email string) error {
 	return nil
 }
 
+func (c *Client) UpdateUser(email, accountId, role string, external bool) error {
+	userid, err := c.GetId(email)
+	if err != nil {
+		return err
+	}
+	body := fmt.Sprintf(`{"accountId":"%v","role":"%v","external":%v}`, accountId, role, external)
+	parms := url.Values{}
+	parms.Add("profile", body)
+	payload := strings.NewReader(parms.Encode())
+	_, err = c.HttpRequest(fmt.Sprintf("users/%v", userid), "PUT", payload)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *Client) HttpRequest(path, method string, body *strings.Reader) ([]byte, error) {
 	req, err := http.NewRequest(method, c.requestPath(path), body)
 	if err != nil {
@@ -94,6 +112,7 @@ func (c *Client) HttpRequest(path, method string, body *strings.Reader) ([]byte,
 	}
 	req.Header.Add("Authorization", c.authToken)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Cookie", "wrikeLocale=en; isWhitelabel=false")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -101,6 +120,9 @@ func (c *Client) HttpRequest(path, method string, body *strings.Reader) ([]byte,
 	respbody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf(string(respbody))
 	}
 	return respbody, nil
 }

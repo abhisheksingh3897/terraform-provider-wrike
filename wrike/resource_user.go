@@ -34,6 +34,16 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"role": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"external": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 		},
 		Create: resourceCreateUser,
 		Read:   resourceReadUser,
@@ -85,6 +95,8 @@ func resourceReadUser(d *schema.ResourceData, m interface{}) error {
 		d.Set("lastname", user.LastName)
 		d.Set("email", user.Profile[0].Email)
 		d.Set("accountid", user.Profile[0].AccountID)
+		d.Set("role", user.Profile[0].Role)
+		d.Set("external", user.Profile[0].External)
 		return nil
 	})
 	if retryErr != nil {
@@ -98,8 +110,27 @@ func resourceReadUser(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceUpdateUser(d *schema.ResourceData, m interface{}) error {
-	if d.HasChange("employee_email") {
-		return fmt.Errorf("Employee not allowed to change employee_email")
+	if d.HasChange("email") {
+		return fmt.Errorf("User is not allowed to change email")
+	}
+	apiClient := m.(*client.Client)
+	UserId := d.Id()
+	retryErr := resource.Retry(2*time.Minute, func() *resource.RetryError {
+		err := apiClient.UpdateUser(UserId, d.Get("accountid").(string), d.Get("role").(string), d.Get("external").(bool))
+		if err != nil {
+			if apiClient.IsRetry(err) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	if retryErr != nil {
+		if strings.Contains(retryErr.Error(), "user not found") == true {
+			d.SetId("")
+			return nil
+		}
+		return retryErr
 	}
 	return nil
 }
@@ -121,5 +152,7 @@ func resourceUserImporter(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 	d.Set("lastname", user.LastName)
 	d.Set("email", user.Profile[0].Email)
 	d.Set("accountid", user.Profile[0].AccountID)
+	d.Set("role", user.Profile[0].Role)
+	d.Set("external", user.Profile[0].External)
 	return []*schema.ResourceData{d}, nil
 }

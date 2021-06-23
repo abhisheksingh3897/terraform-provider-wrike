@@ -12,17 +12,18 @@ terraform {
   }
   
   resource "wrike_user" "user"{
-
-    email= "abhisheksingh17@ece.iiitp.ac.in"
+    role="Collaborator"
+    external=true
+    email= "shubham@clevertap.com"
   }
 
-  data "wrike_user" "user"{
-	  email="abhishek.s@clevertap.com"
-  }
+  # data "wrike_user" "user"{
+	#   email="abhishek.s@clevertap.com"
+  # }
 
-  output "list"{
-	  value=data.wrike_user.user
-  }
+  # output "list"{
+	#   value=data.wrike_user.user
+  # }
 
   output "resourse_list"{
 	  value=wrike_user.user
