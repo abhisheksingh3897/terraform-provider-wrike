@@ -2,7 +2,6 @@ package wrike
 
 import (
 	"terraform-provider-wrike/client"
-	"terraform-provider-wrike/token"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -10,20 +9,10 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"refresh_token": {
+			"token": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("WRIKE_REFRESH_TOKEN", ""),
-			},
-			"client_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("WRIKE_CLIENT_ID", ""),
-			},
-			"client_secret": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("WRIKE_CLIENT_SECRET", ""),
+				DefaultFunc: schema.EnvDefaultFunc("WRIKE_TOKEN", ""),
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -37,10 +26,7 @@ func Provider() *schema.Provider {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	token, err := token.GenerateToken(d.Get("client_id").(string), d.Get("client_secret").(string), d.Get("refresh_token").(string))
-	if err != nil {
-		return nil, err
-	}
+	token := d.Get("token").(string)
 	return client.NewClient(token), nil
 
 }
